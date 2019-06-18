@@ -25,6 +25,8 @@
 #include "Projectile.h"
 #include "Explosion.h"
 #include "BattlescapeState.h"
+#include "MapEditor.h"
+#include "MapEditorState.h"
 #include "Particle.h"
 #include "../Mod/Mod.h"
 #include "../Engine/Action.h"
@@ -897,7 +899,9 @@ void Map::drawTerrain(Surface *surface)
 					auto* unit = tile->getUnit();
 
 					// Draw cursor back
-					if (_cursorType != CT_NONE && _selectorX > itX - _cursorSize && _selectorY > itY - _cursorSize && _selectorX < itX+1 && _selectorY < itY+1 && !_save->getBattleState()->getMouseOverIcons())
+					if (_cursorType != CT_NONE && _selectorX > itX - _cursorSize && _selectorY > itY - _cursorSize && _selectorX < itX+1 && _selectorY < itY+1 &&
+						((_save->getMapEditorState() && !_save->getMapEditorState()->getMouseOverIcons()) || 
+						(_save->getBattleState() && !_save->getBattleState()->getMouseOverIcons())))
 					{
 						if (_camera->getViewLevel() == itZ)
 						{
@@ -1255,7 +1259,9 @@ void Map::drawTerrain(Surface *surface)
 						}
 					}
 					// Draw cursor front
-					if (_cursorType != CT_NONE && _selectorX > itX - _cursorSize && _selectorY > itY - _cursorSize && _selectorX < itX+1 && _selectorY < itY+1 && !_save->getBattleState()->getMouseOverIcons())
+					if (_cursorType != CT_NONE && _selectorX > itX - _cursorSize && _selectorY > itY - _cursorSize && _selectorX < itX+1 && _selectorY < itY+1 &&
+						((_save->getMapEditorState() && !_save->getMapEditorState()->getMouseOverIcons()) || 
+						(_save->getBattleState() && !_save->getBattleState()->getMouseOverIcons())))
 					{
 						if (_camera->getViewLevel() == itZ)
 						{
