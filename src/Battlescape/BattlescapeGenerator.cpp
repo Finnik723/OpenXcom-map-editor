@@ -4581,9 +4581,7 @@ void BattlescapeGenerator::loadMapForEditing(MapBlock *block)
 		// We check the size defined in the file instead since we need to set the 'battlescape' size
 		int sizex, sizey, sizez;
 		char size[3];
-		unsigned char value[4];
 		std::string filename = "MAPS/" + block->getName() + ".MAP";
-		unsigned int terrainObjectID;
 
 		// Load file
 		auto mapFile = FileMap::getIStream(filename);
@@ -4598,14 +4596,10 @@ void BattlescapeGenerator::loadMapForEditing(MapBlock *block)
 		_mapsize_z = sizez;
 		init(true);
 
-		for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
+		for (const auto& i : *_terrain->getMapDataSets())
 		{
-			(*i)->loadData();
-			if (_game->getMod()->getMCDPatch((*i)->getName()))
-			{
-				_game->getMod()->getMCDPatch((*i)->getName())->modifyData(*i);
-			}
-			_save->getMapDataSets()->push_back(*i);
+			i->loadData(_game->getMod()->getMCDPatch(i->getName()));
+			_save->getMapDataSets()->push_back(i);
 		}
 
 		loadMAP(block, 0, 0, 0, _terrain, 0, true);
@@ -4618,14 +4612,10 @@ void BattlescapeGenerator::loadMapForEditing(MapBlock *block)
 		_mapsize_z = _save->getMapSizeZ();
 		init(true);
 
-		for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
+		for (const auto& i : *_terrain->getMapDataSets())
 		{
-			(*i)->loadData();
-			if (_game->getMod()->getMCDPatch((*i)->getName()))
-			{
-				_game->getMod()->getMCDPatch((*i)->getName())->modifyData(*i);
-			}
-			_save->getMapDataSets()->push_back(*i);
+			i->loadData(_game->getMod()->getMCDPatch(i->getName()));
+			_save->getMapDataSets()->push_back(i);
 		}
 
 		for (int z = 0; z < _mapsize_z; ++z)
@@ -4639,7 +4629,7 @@ void BattlescapeGenerator::loadMapForEditing(MapBlock *block)
 						TilePart part = (TilePart)t;
 						_save->getTile(Position(x, y, z))->setMapData(0, -1, -1, part);
 					}
-					_save->getTile(Position(x, y, z))->setDiscovered(true, 2);
+					_save->getTile(Position(x, y, z))->setDiscovered(true, O_FLOOR);
 				}
 			}
 		}
