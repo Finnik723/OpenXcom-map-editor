@@ -1717,7 +1717,6 @@ void Map::drawTerrain(Surface *surface)
 
 	// Draw markers for nodes in the map editor
 	// TODO: toggle for showing nodes/not
-	// TODO: toggle for showing nodes above/below current level
 	// TODO: toggle for drawing connections
 	// TODO: draw lines between connected nodes, color/dash based on connection type
 	// TODO: replace with pathfinding circle colors based on type
@@ -1738,18 +1737,6 @@ void Map::drawTerrain(Surface *surface)
 			_camera->convertMapToScreen(nodePos, &screenPosition);
 			screenPosition += _camera->getMapOffset();
 
-			// Show nodes below the current level as dashed/"transparent" marker
-			// Don't show nodes above the current level
-			int markerFrame = 10;
-			if (nodePos.z < _camera->getViewLevel())
-			{
-				markerFrame += 12;
-			}
-			else if (nodePos.z > _camera->getViewLevel())
-			{
-				continue;
-			}
-
 			//int Pathfinding::red = 3;
 			//int Pathfinding::yellow = 10;
 			//int Pathfinding::green = 4;
@@ -1757,12 +1744,33 @@ void Map::drawTerrain(Surface *surface)
 			bool selected = it != _game->getMapEditor()->getSelectedNodes()->end();
 			int markerColor = selected ? 2 : 4;
 
+			// Show nodes outside the current level as dashed/"transparent" marker
+			// Or if the option is turned off, don't show them at all
+			int markerFrame = 10;
+			if (nodePos.z != _camera->getViewLevel())
+			{
+				if (Options::mapEditorShowOutOfPlaneNodes || selected)
+				{
+					markerFrame += 12;
+				}
+				else if (!selected)
+				{
+					continue;
+				}
+			}
+
 			tmpSurface = _game->getMod()->getSurfaceSet("Pathfinding")->getFrame(markerFrame);
 			if (tmpSurface)
 			{
 				Surface::blitRaw(surface, tmpSurface, screenPosition.x, screenPosition.y, 0, false, markerColor);
 			}
 
+			// Only draw links if the options allow us to
+			if (!selected && Options::mapEditorShowLinksOnlyForSelectedNodes)
+			{
+				continue;
+			}
+			
 			// Draw lines and arrows for connections between nodes
 			Position startLinePos = screenPosition;
 			startLinePos.x += _spriteWidth / 2;
@@ -1780,7 +1788,12 @@ void Map::drawTerrain(Surface *surface)
 					{
 						continue;
 					}
+
 					linkPosition = otherNode->getPosition();
+					if (linkPosition.z != _camera->getViewLevel() && !Options::mapEditorShowOutOfPlaneNodeLinks)
+					{
+						continue;
+					}
 				}
 				// exit north
 				else if (linkID == -2)
@@ -1863,8 +1876,11 @@ void Map::drawTerrain(Surface *surface)
 			Position nodePos = node->getPosition();
 			_camera->convertMapToScreen(nodePos, &screenPosition);
 			screenPosition += _camera->getMapOffset();
-			
-			if (nodePos.z > _camera->getViewLevel())
+
+			std::vector<Node*>::iterator it = find(_game->getMapEditor()->getSelectedNodes()->begin(), _game->getMapEditor()->getSelectedNodes()->end(), node);
+			bool selected = it != _game->getMapEditor()->getSelectedNodes()->end();
+
+			if (nodePos.z != _camera->getViewLevel() && !Options::mapEditorShowOutOfPlaneNodes && !selected)
 			{
 				continue;
 			}
