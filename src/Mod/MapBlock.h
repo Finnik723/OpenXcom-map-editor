@@ -54,6 +54,7 @@ private:
 	std::map<std::string, std::pair<int, int> > _itemsFuseTimer;
 public:
 	MapBlock(const std::string &name);
+	MapBlock(const std::string &name, int size_x, int size_y, int size_z);
 	~MapBlock();
 	/// Loads the map block from YAML.
 	void load(const YAML::Node& node);
